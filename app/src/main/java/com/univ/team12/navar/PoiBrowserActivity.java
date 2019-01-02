@@ -351,96 +351,51 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
 
         world=new World(getApplicationContext());
         world.setGeoPosition(mLastLocation.getLatitude(),mLastLocation.getLongitude());
-        world.setDefaultImage(R.drawable.ar_sphere_default);
+        world.setDefaultImage(R.drawable.map_marker);
 
         arFragmentSupport.getGLSurfaceView().setPullCloserDistance(25);
 
-        GeoObject geoObjects[]=new GeoObject[pois.size()];
-
         for(int i=0;i<pois.size();i++) {
+            Result poi = pois.get(i);
+
+            double distance = Math.round(SphericalUtil.computeDistanceBetween(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), new LatLng(poi.getGeometry().getLocation().getLat(),
+                            poi.getGeometry().getLocation().getLng())));
+
             GeoObject poiGeoObj=new GeoObject(minSpace*(i+1));
-            //ArObject2 poiGeoObj=new ArObject2(1000*(i+1));
+            poiGeoObj.setGeoPosition(poi.getGeometry().getLocation().getLat(),
+                    poi.getGeometry().getLocation().getLng());
+            poiGeoObj.setName(poi.getPlaceId());
+            poiGeoObj.setDistanceFromUser(distance);
 
-//            poiGeoObj.setImageUri(getImageUri(this,textAsBitmap(pois.get(i).getName(),10.0f, Color.WHITE)));
-            poiGeoObj.setGeoPosition(pois.get(i).getGeometry().getLocation().getLat(),
-                    pois.get(i).getGeometry().getLocation().getLng());
-            poiGeoObj.setName(pois.get(i).getPlaceId());
-            //poiGeoObj.setPlaceId(pois.get(0).getPlaceId());
-
-            //Bitmap bitmap=textAsBitmap(pois.get(i).getName(),30.0f,Color.WHITE);
-
-            Bitmap snapshot = null;
-            View view= getLayoutInflater().inflate(R.layout.poi_container,null);
-            TextView name= (TextView)view.findViewById(R.id.poi_container_name);
-            TextView dist= (TextView)view.findViewById(R.id.poi_container_dist);
-            ImageView icon=(ImageView)view.findViewById(R.id.poi_container_icon);
-
-            name.setText(pois.get(i).getName());
-            String distance=String.valueOf((SphericalUtil.computeDistanceBetween(
-                    new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()),
-                    new LatLng(pois.get(i).getGeometry().getLocation().getLat(),
-                            pois.get(i).getGeometry().getLocation().getLng())))/minSpace);
-            String d=distance+" KM";
-            dist.setText(d);
-
-            String type=pois.get(i).getTypes().get(0);
-            Log.d(TAG, "Configure_AR: TYPE:"+type + "LODGING:"+R.string.logding);
+            String type=poi.getTypes().get(0);
             if(type.equals(getResources().getString(R.string.restaurant))){
-                icon.setImageResource(R.drawable.food_fork_drink);
-            }else if(type.equals(getResources().getString(R.string.logding))){
-                icon.setImageResource(R.drawable.hotel);
-            }else if(type.equals(getResources().getString(R.string.atm))){
-                icon.setImageResource(R.drawable.cash_usd);
+                poiGeoObj.setImageResource(R.drawable.food_fork_drink);
+            }else if(type.equals(getResources().getString(R.string.logding)) || type.equals(getResources().getString(R.string.locality)) || type.equals(getResources().getString(R.string.local_government_office)) || type.equals(getResources().getString(R.string.establishment)) || type.equals(getResources().getString(R.string.sublocality_level_1))){
+                poiGeoObj.setImageResource(R.drawable.office);
+            }else if(type.equals(getResources().getString(R.string.atm)) || type.equals(getResources().getString(R.string.bank)) || type.equals(getResources().getString(R.string.finance))){
+                poiGeoObj.setImageResource(R.drawable.cash_usd);
             }else if(type.equals(getResources().getString(R.string.hosp))){
-                icon.setImageResource(R.drawable.hospital);
+                poiGeoObj.setImageResource(R.drawable.hospital);
             }else if(type.equals(getResources().getString(R.string.movie))){
-                icon.setImageResource(R.drawable.filmstrip);
+                poiGeoObj.setImageResource(R.drawable.filmstrip);
             }else if(type.equals(getResources().getString(R.string.cafe))){
-                icon.setImageResource(R.drawable.coffee);
+                poiGeoObj.setImageResource(R.drawable.coffee);
             }else if(type.equals(getResources().getString(R.string.bakery))){
-                icon.setImageResource(R.drawable.food);
-            }else if(type.equals(getResources().getString(R.string.mall))){
-                icon.setImageResource(R.drawable.shopping);
+                poiGeoObj.setImageResource(R.drawable.food);
+            }else if(type.equals(getResources().getString(R.string.mall)) || type.equals(getResources().getString(R.string.shopping_mall)) || type.equals(getResources().getString(R.string.store)) || type.equals(getResources().getString(R.string.home_goods_store)) || type.equals(getResources().getString(R.string.furniture_store))){
+                poiGeoObj.setImageResource(R.drawable.shopping);
             }else if(type.equals(getResources().getString(R.string.pharmacy))){
-                icon.setImageResource(R.drawable.pharmacy);
-            }else if(type.equals(getResources().getString(R.string.park))){
-                icon.setImageResource(R.drawable.pine_tree);
+                poiGeoObj.setImageResource(R.drawable.pharmacy);
+            }else if(type.equals(getResources().getString(R.string.park)) || type.equals(getResources().getString(R.string.point_of_interest))){
+                poiGeoObj.setImageResource(R.drawable.pine_tree);
             }else if(type.equals(getResources().getString(R.string.bus))){
-                icon.setImageResource(R.drawable.bus);
+                poiGeoObj.setImageResource(R.drawable.bus);
+            }else if(type.equals(getResources().getString(R.string.mosque)) || type.equals(getResources().getString(R.string.place_of_worship)) || type.equals(getResources().getString(R.string.bank))){
+                poiGeoObj.setImageResource(R.drawable.mosque);
             }else {
-                icon.setImageResource(R.drawable.map_icon);
+                poiGeoObj.setImageResource(R.drawable.map_icon);
+                poiGeoObj.setImageUri(poi.getIcon());
             }
-
-
-            view.setDrawingCacheEnabled(true);
-            view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-
-            try {
-              //  Paint paint = new Paint(ANTI_ALIAS_FLAG);
-//                paint.setTextSize(textSize);
-//                paint.setColor(textColor);
-                //paint.setTextAlign(Paint.Align.LEFT);
-//                float baseline = -paint.ascent(); // ascent() is negative
-//                int width = (int) (paint.measureText(pois.get(i).getName()) + 0.5f); // round
-//                int height = (int) (baseline + paint.descent() + 0.5f);
-
-                view.measure(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
-                snapshot = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight()
-                        , Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(snapshot);
-                view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
-                view.draw(canvas);
-                //canvas.drawBitmap(snapshot);
-                //snapshot = Bitmap.createBitmap(view.getDrawingCache(),10,10,200,100); // You can tell how to crop the snapshot and whatever in this method
-            } finally {
-                view.setDrawingCacheEnabled(false);
-            }
-
-
-            String uri=saveToInternalStorage(snapshot,pois.get(i).getId()+".png");
-
-            //icon.setImageURI(Uri.parse(uri));
-            poiGeoObj.setImageUri(pois.get(i).getIcon());
 
             world.addBeyondarObject(poiGeoObj);
         }
@@ -450,76 +405,6 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
         // ... and send it to the fragment
         arFragmentSupport.setWorld(world);
 
-    }
-
-    private String saveToInternalStorage(Bitmap bitmapImage,String name){
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/yourapp/app_data/imageDir
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-        File mypath=new File(directory,name);
-
-        Log.d(TAG, "saveToInternalStorage: PATH:"+mypath.toString());
-
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return mypath.toString();
-    }
-
-    public String getImageUri(Context inContext, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.PNG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path).toString();
-
-
-//        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-//        // path to /data/data/yourapp/app_data/imageDir
-//        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-//        // Create imageDir
-//        File mypath=new File(directory,"profile.jpg");
-//
-//        FileOutputStream fos = null;
-//        try {
-//            fos = new FileOutputStream(mypath);
-//            // Use the compress method on the BitMap object to write image to the OutputStream
-//            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                fos.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return directory.getAbsolutePath();
-    }
-
-    public Bitmap textAsBitmap(String text, float textSize, int textColor) {
-        Paint paint = new Paint(ANTI_ALIAS_FLAG);
-        paint.setTextSize(textSize);
-        paint.setColor(textColor);
-        paint.setTextAlign(Paint.Align.LEFT);
-        float baseline = -paint.ascent(); // ascent() is negative
-        int width = (int) (paint.measureText(text) + 0.5f); // round
-        int height = (int) (baseline + paint.descent() + 0.5f);
-        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(image);
-        canvas.drawText(text, 0, baseline, paint);
-        return image;
     }
 
     private void Set_googleApiClient() {

@@ -58,6 +58,8 @@ public class ArFragmentSupport extends Fragment implements FpsUpdatable,OnClickL
     private TextView mFpsTextView;
     private RelativeLayout mMainLayout;
 
+    private float maxDistant = 10000f;
+
     private Camera mCamera;
     private Camera.Parameters param;
 
@@ -101,7 +103,7 @@ public class ArFragmentSupport extends Fragment implements FpsUpdatable,OnClickL
         mMainLayout.addView(mBeyondarCameraView, params);
         mMainLayout.addView(mBeyondarGLSurface, params);
 
-        mBeyondarGLSurface.setMaxDistanceToRender(1000f);
+        mBeyondarGLSurface.setMaxDistanceToRender(maxDistant);
         Log.d("ARFRAGG", "init: MaxDistRender"+mBeyondarGLSurface.getMaxDistanceToRender());
     }
 
