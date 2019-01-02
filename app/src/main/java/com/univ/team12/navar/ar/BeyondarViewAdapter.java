@@ -20,45 +20,17 @@ import java.util.Queue;
  *
  * <pre>
  * <code>
- * private class CustomBeyondarViewAdapter extends BeyondarViewAdapter {
- *
- * 		LayoutInflater inflater;
- *
- * 		public CustomBeyondarViewAdapter(Context context) {
- * 			super(context);
- * 			inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
- * 		}
- *
- * 		@Override
- * 		public View getView(BeyondarObject beyondarObject, View recycledView, ViewGroup parent) {
- * 			if (!showViewOn.contains(beyondarObject)) {
- * 				return null;
- * 			}
- * 			if (recycledView == null) {
- * 				recycledView = inflater.inflate(R.layout.beyondar_object_view, null);
- * 			}
- *
- * 			TextView textView = (TextView) recycledView.findViewById(R.id.titleTextView);
- * 			textView.setText(beyondarObject.getName());
- * 			Button button = (Button) recycledView.findViewById(R.id.button);
- * 			button.setOnClickListener(AttachViewToGeoObjectActivity.this);
- *
- *          // Once the view is ready we specify the position
- * 			setPosition(beyondarObject.getScreenPositionTopRight());
- *
- * 			return recycledView;
- * 		}
- * 	}
- * </code>
- * </pre>
- *
+ */
+  	/**
+  </code>
+  </pre>
+
  * Then when the adapter is ready we can set it in the
  * {@link com.beyondar.android.fragment.BeyondarFragment BeyondarFragment}:
  *
  * <code>
  * <pre>
- * CustomBeyondarViewAdapter customBeyondarViewAdapter = new CustomBeyondarViewAdapter(this);
- * mBeyondarFragment.setBeyondarViewAdapter(customBeyondarViewAdapter);
+ *
  * </code> </pre>
  */
 public abstract class BeyondarViewAdapter {

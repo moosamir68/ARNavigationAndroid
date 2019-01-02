@@ -1,19 +1,14 @@
 package com.univ.team12.navar;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -24,7 +19,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -33,6 +27,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beyondar.android.opengl.texture.Texture;
 import com.beyondar.android.view.OnClickBeyondarObjectListener;
 import com.beyondar.android.world.BeyondarObject;
 import com.beyondar.android.world.GeoObject;
@@ -44,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.SphericalUtil;
 import com.univ.team12.navar.ar.ArBeyondarGLSurfaceView;
 import com.univ.team12.navar.ar.ArFragmentSupport;
+import com.univ.team12.navar.ar.CustomBeyondarViewAdapter;
 import com.univ.team12.navar.ar.OnTouchBeyondarViewListenerMod;
 import com.univ.team12.navar.network.PlaceResponse;
 import com.univ.team12.navar.network.PoiResponse;
@@ -51,11 +47,6 @@ import com.univ.team12.navar.network.RetrofitInterface;
 import com.univ.team12.navar.network.poi.Result;
 import com.univ.team12.navar.utils.UtilsCheck;
 
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -71,8 +62,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
-import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 
 /**
  * Created by Amal Krishnan on 10-04-2017.
@@ -91,6 +80,7 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
     private ArFragmentSupport arFragmentSupport;
     private World world;
     private int minSpace = 2000;
+    private List<Result> poiResult;
 
     @BindView(R.id.poi_place_detail)
     CardView poi_cardview;
@@ -133,6 +123,8 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
                 R.id.poi_cam_fragment);
         arFragmentSupport.setOnClickBeyondarObjectListener(this);
         arFragmentSupport.setOnTouchBeyondarViewListener(this);
+        CustomBeyondarViewAdapter customBeyondarViewAdapter = new CustomBeyondarViewAdapter(this);
+        arFragmentSupport.setBeyondarViewAdapter(customBeyondarViewAdapter);
 
 
         textView=(TextView) findViewById(R.id.loading_text);
@@ -205,7 +197,7 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
                 poi_browser_progress.setVisibility(View.GONE);
                 seekbar_cardview.setVisibility(View.VISIBLE);
 
-                List<Result> poiResult=response.body().getResults();
+                poiResult = response.body().getResults();
 
                 Configure_AR(poiResult);
             }
@@ -361,10 +353,10 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
             double distance = Math.round(SphericalUtil.computeDistanceBetween(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()), new LatLng(poi.getGeometry().getLocation().getLat(),
                             poi.getGeometry().getLocation().getLng())));
 
-            GeoObject poiGeoObj=new GeoObject(minSpace*(i+1));
+            GeoObject poiGeoObj=new GeoObject(i);
             poiGeoObj.setGeoPosition(poi.getGeometry().getLocation().getLat(),
                     poi.getGeometry().getLocation().getLng());
-            poiGeoObj.setName(poi.getPlaceId());
+            poiGeoObj.setName(poi.getName());
             poiGeoObj.setDistanceFromUser(distance);
 
             String type=poi.getTypes().get(0);
@@ -456,7 +448,7 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
     @Override
     public void onClickBeyondarObject(ArrayList<BeyondarObject> beyondarObjects) {
         if (beyondarObjects.size() > 0) {
-            Poi_details_call(beyondarObjects.get(0).getName());
+            Poi_details_call(this.poiResult.get((int)beyondarObjects.get(0).getId()).getId());
         }
     }
 
