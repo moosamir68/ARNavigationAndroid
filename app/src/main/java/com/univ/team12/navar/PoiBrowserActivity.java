@@ -290,7 +290,8 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
                         Intent intent=new Intent(PoiBrowserActivity.this,ArCamActivity.class);
 
                         try {
-                            intent.putExtra("SRC", "Current Location");
+                            intent.putExtra("SRC", "مکان شما");
+                            intent.putExtra("DESADDRESS", result.getAdrAddress());
                             intent.putExtra("DEST",  result.getGeometry().getLocation().getLat()+","+
                                     result.getGeometry().getLocation().getLng());
                             intent.putExtra("SRCLATLNG",  mLastLocation.getLatitude()+","+mLastLocation.getLongitude());
@@ -448,7 +449,7 @@ public class PoiBrowserActivity extends FragmentActivity implements GoogleApiCli
     @Override
     public void onClickBeyondarObject(ArrayList<BeyondarObject> beyondarObjects) {
         if (beyondarObjects.size() > 0) {
-            Poi_details_call(this.poiResult.get((int)beyondarObjects.get(0).getId()).getId());
+            Poi_details_call(this.poiResult.get((int)beyondarObjects.get(0).getId()).getPlaceId());
         }
     }
 

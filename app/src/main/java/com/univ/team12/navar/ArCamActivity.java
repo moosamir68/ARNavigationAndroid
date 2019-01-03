@@ -70,6 +70,10 @@ public class ArCamActivity extends FragmentActivity implements GoogleApiClient.C
     TextView dirDistance;
     @BindView(R.id.ar_dir_time)
     TextView dirTime;
+    @BindView(R.id.ar_dir_end_address)
+    TextView dirStopAddress;
+    @BindView(R.id.ar_dir_start_address)
+    TextView dirStartAddress;
 
     private final static String TAG="ArCamActivity";
     private String srcLatLng;
@@ -95,6 +99,30 @@ public class ArCamActivity extends FragmentActivity implements GoogleApiClient.C
         //Configure_AR(); //Configure AR Environment
 
 //        Directions_call();
+    }
+
+    @Override
+    public void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BeyondarLocationManager.disable();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BeyondarLocationManager.enable();
     }
 
     private void Set_googleApiClient(){
@@ -135,7 +163,7 @@ public class ArCamActivity extends FragmentActivity implements GoogleApiClient.C
             String instructions=steps[i].getHtmlInstructions();
 
             if(i==0){
-                GeoObject signObject = new GeoObject(10000+i);
+                GeoObject signObject = new GeoObject(i);
                 signObject.setImageResource(R.drawable.start);
                 signObject.setGeoPosition(steps[i].getStartLocation().getLat(),steps[i].getStartLocation().getLng());
                 world.addBeyondarObject(signObject);
@@ -143,7 +171,7 @@ public class ArCamActivity extends FragmentActivity implements GoogleApiClient.C
             }
 
             if(i==steps.length-1){
-                GeoObject signObject = new GeoObject(10000+i);
+                GeoObject signObject = new GeoObject(i);
                 signObject.setImageResource(R.drawable.stop);
                 LatLng latlng=SphericalUtil.computeOffset(
                         new LatLng(steps[i].getEndLocation().getLat(),steps[i].getEndLocation().getLng()),
@@ -157,14 +185,14 @@ public class ArCamActivity extends FragmentActivity implements GoogleApiClient.C
 
             if(instructions.contains("right")) {
                 Log.d(TAG, "Configure_AR: " + instructions);
-                GeoObject signObject = new GeoObject(10000+i);
+                GeoObject signObject = new GeoObject(i);
                 signObject.setImageResource(R.drawable.turn_right);
                 signObject.setGeoPosition(steps[i].getStartLocation().getLat(),steps[i].getStartLocation().getLng());
                 world.addBeyondarObject(signObject);
                 Log.d(TAG, "Configure_AR: RIGHT SIGN:"+i);
             }else if(instructions.contains("left")){
                 Log.d(TAG, "Configure_AR: " + instructions);
-                GeoObject signObject = new GeoObject(10000+i);
+                GeoObject signObject = new GeoObject(i);
                 signObject.setImageResource(R.drawable.turn_left);
                 signObject.setGeoPosition(steps[i].getStartLocation().getLat(),steps[i].getStartLocation().getLng());
                 world.addBeyondarObject(signObject);
@@ -318,6 +346,14 @@ public class ArCamActivity extends FragmentActivity implements GoogleApiClient.C
                 dirTime.setText(directionsResponse.getRoutes().get(0).getLegs().get(0)
                         .getDuration().getText());
 
+                dirStopAddress.setVisibility(View.VISIBLE);
+                dirStopAddress.setText(directionsResponse.getRoutes().get(0).getLegs().get(0)
+                        .getEndAddress());
+
+                dirStartAddress.setVisibility(View.VISIBLE);
+                dirStartAddress.setText(directionsResponse.getRoutes().get(0).getLegs().get(0)
+                        .getStartAddress());
+
                 steps=new Step[step_array_size];
 
                 for(int i=0;i<step_array_size;i++) {
@@ -336,30 +372,6 @@ public class ArCamActivity extends FragmentActivity implements GoogleApiClient.C
                 new AlertDialog.Builder(getApplicationContext()).setMessage("Fetch Failed").show();
             }
         });
-    }
-
-    @Override
-    public void onStart() {
-        mGoogleApiClient.connect();
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        BeyondarLocationManager.disable();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        BeyondarLocationManager.enable();
     }
 
     @Override
